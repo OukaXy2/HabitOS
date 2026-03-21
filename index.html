@@ -1972,19 +1972,24 @@ function renderTodos() {
     const lbl = document.createElement('div');
     lbl.className = 'todo-section-label done-lbl';
     lbl.style.marginTop = '16px';
+
+    const itemsWrap = document.createElement('div');
+    // Ingat state open/close — default open kalau belum pernah ditutup
+    const doneIsOpen = localStorage.getItem('dailyos_done_open') !== 'false';
+    itemsWrap.className = 'done-items' + (doneIsOpen ? ' open' : '');
+
     lbl.innerHTML = `
       <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0"></span>
       Selesai (${completed.length})
-      <svg class="done-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg class="done-chevron ${doneIsOpen ? 'open' : ''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     `;
 
-    const itemsWrap = document.createElement('div');
-    itemsWrap.className = 'done-items';
     completed.forEach(t => itemsWrap.appendChild(makeTodoCard(t)));
 
     lbl.onclick = () => {
       const isOpen = itemsWrap.classList.toggle('open');
       lbl.querySelector('.done-chevron').classList.toggle('open', isOpen);
+      localStorage.setItem('dailyos_done_open', isOpen ? 'true' : 'false');
     };
 
     done.appendChild(lbl);
@@ -2827,12 +2832,20 @@ async function getAICoach() {
   textEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
 
   const today = getToday();
-  const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const activeTodos = todos.filter(t => !t.done);
+  const scheduledHabits = habits.filter(h => isHabitScheduled(h, today));
+
+  // Skip API kalau tidak ada data sama sekali
+  if (habits.length === 0 && todos.length === 0) {
+    textEl.textContent = 'Belum ada habit atau to-do. Tambahkan dulu di tab Habit atau To-Do ya!';
+    if (refreshBtn) refreshBtn.style.display = 'block';
+    return;
+  }
+
+  const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   // Siapkan ringkasan habit (hanya yang dijadwalkan hari ini)
-  const habitSummary = habits.map(h => {
-    if (!isHabitScheduled(h, today)) return null;
+  const habitSummary = scheduledHabits.map(h => {
     const log = h.history?.[today] || [];
     const total = (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
     const done = log.length;
@@ -2845,7 +2858,7 @@ async function getAICoach() {
       else break;
     }
     return `- ${h.name} | Streak: ${streak} hari | Status: ${done >= total ? 'SELESAI ✓' : 'BELUM ('+done+'/'+total+')'}`;
-  }).filter(Boolean).join('\n');
+  }).join('\n');
 
   const todoSummary = activeTodos.length > 0
     ? activeTodos.map(t => `- [${t.priority.toUpperCase()}] ${t.title}${t.deadline?' (deadline: '+formatDate(t.deadline)+')':''}`).join('\n')

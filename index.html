@@ -18,10 +18,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #F7F6F3;
+      --bg: #FFFFFF;
       --surface: #FFFFFF;
-      --surface2: #F0EFE9;
-      --border: #E5E4DF;
+      --surface2: #F5F5F5;
+      --border: #EBEBEB;
       --text: #1A1917;
       --text-2: #6B6A65;
       --text-3: #A8A7A2;
@@ -33,8 +33,8 @@
       --soon-bg: #FEF9EC;
       --normal: #2C7A7B;
       --normal-bg: #F0F8F8;
-      --xp: #7C6F4A;
-      --xp-bg: #FAF7F0;
+      --xp: #555555;
+      --xp-bg: #F5F5F5;
       --radius: 12px;
       --radius-sm: 8px;
       --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
@@ -73,6 +73,13 @@
       max-width: 480px;
       margin: 0 auto;
       padding-bottom: 80px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    input, textarea, select, [contenteditable] {
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     /* ===== HEADER ===== */
@@ -149,7 +156,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px 16px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -223,6 +230,10 @@
       overflow: visible;
       box-shadow: var(--shadow);
       position: relative;
+      z-index: 1;
+    }
+    .habit-card.menu-open {
+      z-index: 50;
     }
     .habit-card-header {
       padding: 14px 14px 12px;
@@ -231,10 +242,15 @@
       gap: 10px;
     }
     .habit-color-dot {
-      width: 8px; height: 8px;
+      width: 10px; height: 10px;
       border-radius: 50%;
-      margin-top: 5px;
+      margin-top: 4px;
       flex-shrink: 0;
+      border: 1.5px solid rgba(128,128,128,0.2);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    body.dark .habit-color-dot[data-dark-invert="1"] {
+      background: #E0E0E0 !important;
     }
     .habit-name {
       font-size: 14px;
@@ -818,14 +834,57 @@
     .habit-card.off-schedule { opacity: 0.45; }
     .checkbox.disabled { cursor: not-allowed; pointer-events: none; }
 
+    /* ===== ICON PICKER ===== */
+    .icon-picker {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 6px; margin-top: 4px;
+    }
+    .icon-opt {
+      aspect-ratio: 1; border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.15s; padding: 6px;
+      color: var(--text-2);
+    }
+    .icon-opt:hover { border-color: var(--text-2); color: var(--text); }
+    .icon-opt.active {
+      border-color: var(--text);
+      background: var(--text);
+      color: var(--accent-fg);
+    }
+    .icon-opt svg { width: 18px; height: 18px; }
+
+    /* Habit icon di card */
+    .habit-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: white;
+    }
+    .habit-icon svg { width: 16px; height: 16px; }
+    /* Warna terang (putih) — icon jadi gelap + border */
+    .habit-icon.light-color {
+      color: #1A1917;
+      border: 1.5px solid #E5E5E5;
+    }
+    /* Warna gelap (hitam) di dark mode — background jadi terang */
+    body.dark .habit-icon.dark-invert {
+      background: #E8E8E8 !important;
+      color: #1A1917;
+    }
+
     /* ===== DRAG HANDLE ===== */
     .drag-handle {
-      color: var(--text-3); cursor: grab; padding: 4px 6px 4px 2px;
+      color: var(--border); cursor: grab; padding: 4px 5px 4px 0px;
       display: flex; align-items: center; flex-shrink: 0;
-      touch-action: none;
+      touch-action: none; opacity: 0.6;
     }
+    .drag-handle:hover { color: var(--text-3); opacity: 1; }
     .drag-handle:active { cursor: grabbing; }
-    .todo-drag-handle { padding: 0 6px 0 0; }
+    .drag-handle svg { width: 11px; height: 11px; }
+    .todo-drag-handle { padding: 0 5px 0 0; }
     .habit-card.dragging, .todo-card.dragging {
       opacity: 0.4; border: 1.5px dashed var(--text-3);
     }
@@ -1383,14 +1442,59 @@
         <div class="form-group">
           <label class="form-label">Warna</label>
           <div class="color-picker" id="colorPicker">
-            <div class="color-dot active" data-color="#1A1917" style="background:#1A1917"></div>
+            <div class="color-dot" data-color="#FFFFFF" style="background:#FFFFFF;border:1.5px solid #ddd"></div>
             <div class="color-dot" data-color="#C0392B" style="background:#C0392B"></div>
             <div class="color-dot" data-color="#2C7A7B" style="background:#2C7A7B"></div>
             <div class="color-dot" data-color="#7C6F4A" style="background:#7C6F4A"></div>
             <div class="color-dot" data-color="#6B4FBB" style="background:#6B4FBB"></div>
+            <div class="color-dot" data-color="#3B82F6" style="background:#3B82F6"></div>
+            <div class="color-dot" data-color="#F59E0B" style="background:#F59E0B"></div>
+            <div class="color-dot active" data-color="#22C55E" style="background:#22C55E"></div>
           </div>
           <input type="hidden" id="habitColor" value="#1A1917">
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon</label>
+        <div class="icon-picker" id="iconPicker">
+          <button type="button" class="icon-opt active" data-icon="star" title="Default">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="dumbbell" title="Olahraga">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 9.5h3v5H3zM18 9.5h3v5h-3z"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="book" title="Baca">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="briefcase" title="Kerja">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="film" title="Hiburan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="apple" title="Makan/Diet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20.94c1.5 0 4-1.73 4-6.94 0-4-3-7-4-7s-4 3-4 7c0 5.21 2.5 6.94 4 6.94z"/><path d="M12 7c0 0 1-4 4-4"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="moon" title="Tidur">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="feather" title="Menulis">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="dollar" title="Keuangan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="gamepad" title="Gaming">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 12h.01M18 12h.01"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="walk" title="Jalan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="4" r="1.5"/><path d="M9 8l-2 5h3l1 5M15 8l2 5h-3l-1 5M9 8l3 2 3-2"/></svg>
+          </button>
+          <button type="button" class="icon-opt" data-icon="heart" title="Kesehatan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </button>
+        </div>
+        <input type="hidden" id="habitIcon" value="star">
       </div>
       <div class="form-group">
         <label class="form-label">Jadwal Habit</label>
@@ -1611,14 +1715,14 @@ function renderHabits() {
 
     let subHtml = '';
     if (subTasks.length === 0) {
-      const done = todayLog.includes('main');
+      const done = todayLog.some(e => (typeof e === 'string' ? e : e.id) === 'main');
       subHtml = `<div class="subtask-row">
         <div class="checkbox ${done?'checked':''}${!isScheduledToday?' disabled':''}" onclick="${isScheduledToday?`toggleCheck(${i},'main',this)`:''}"></div>
         <span class="subtask-text ${done?'done':''}">Selesaikan Habit Ini</span>
       </div>`;
     } else {
       subTasks.forEach(sub => {
-        const done = todayLog.includes(sub.id);
+        const done = todayLog.some(e => (typeof e === 'string' ? e : e.id) === sub.id);
         subHtml += `<div class="subtask-row">
           <div class="checkbox ${done?'checked':''}${!isScheduledToday?' disabled':''}" onclick="${isScheduledToday?`toggleCheck(${i},'${sub.id}',this)`:''}"></div>
           <span class="subtask-text ${done?'done':''}">${sub.text}</span>
@@ -1637,7 +1741,7 @@ function renderHabits() {
         <div class="drag-handle" title="Geser untuk reorder">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="19" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </div>
-        <div class="habit-color-dot" style="background:${h.color}"></div>
+        <div class="habit-icon${isDarkColor(h.color)?' dark-invert':''}${isLightColor(h.color)?' light-color':''}" style="background:${h.color}">${getHabitIcon(h.icon)}</div>
         <div style="flex:1">
           <div class="habit-name">${h.name}</div>
           <div class="habit-cat">${h.category}</div>
@@ -1674,7 +1778,10 @@ window.toggleCheck = function(idx, subId, el) {
   const today = getToday();
   if (!h.history[today]) h.history[today] = [];
   const log = h.history[today];
-  const pos = log.indexOf(subId);
+
+  // Cari entry — support format lama (string) dan baru (object)
+  const pos = log.findIndex(entry => (typeof entry === 'string' ? entry : entry.id) === subId);
+
   if (pos > -1) {
     log.splice(pos, 1);
     totalPoints = Math.max(0, totalPoints - 10);
@@ -1683,7 +1790,15 @@ window.toggleCheck = function(idx, subId, el) {
     if (txt) txt.classList.remove('done');
     if (log.length === 0) delete h.history[today];
   } else {
-    log.push(subId);
+    // Simpan snapshot teks saat ini bersama ID
+    let snapText = subId;
+    if (subId === 'main') {
+      snapText = h.name;
+    } else {
+      const sub = (h.subTasks || []).find(s => s.id === subId);
+      if (sub) snapText = sub.text;
+    }
+    log.push({ id: subId, text: snapText });
     totalPoints += 10;
     el.classList.add('checked');
     const txt = el.nextElementSibling;
@@ -1706,9 +1821,22 @@ window.toggleCollapse = function(idx) {
 
 window.toggleMenu = function(e, idx) {
   e.stopPropagation();
-  document.querySelectorAll('.dropdown-menu').forEach((m, i) => { if (i !== idx) m.classList.add('hidden'); });
+  // Tutup semua menu lain + hapus menu-open dari semua card
+  document.querySelectorAll('.dropdown-menu').forEach((m, i) => {
+    if (i !== idx) m.classList.add('hidden');
+  });
+  document.querySelectorAll('.habit-card.menu-open').forEach(c => c.classList.remove('menu-open'));
+
   const menu = document.getElementById('menu' + idx);
-  if (menu) menu.classList.toggle('hidden');
+  if (!menu) return;
+  const isNowOpen = menu.classList.toggle('hidden') === false;
+  // classList.toggle('hidden') returns true if class was ADDED (menu closed)
+  // jadi kalau hidden di-remove (menu dibuka), naikkan z-index card-nya
+  const card = menu.closest('.habit-card');
+  if (card) {
+    const menuHidden = menu.classList.contains('hidden');
+    card.classList.toggle('menu-open', !menuHidden);
+  }
 };
 
 window.deleteHabit = async function(idx) {
@@ -1726,6 +1854,7 @@ window.editHabit = function(idx) {
   document.querySelectorAll('.color-dot').forEach(d => {
     d.classList.toggle('active', d.dataset.color === h.color);
   });
+  setIconPickerValue(h.icon || 'star');
   // Restore hari aktif
   document.querySelectorAll('.day-btn').forEach(b => {
     b.classList.toggle('active', (h.activeDays || []).includes(parseInt(b.dataset.day)));
@@ -1748,7 +1877,9 @@ function openHabitModal() {
   document.getElementById('habitName').value = '';
   document.getElementById('habitCategory').value = 'General';
   document.getElementById('habitColor').value = '#1A1917';
-  document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === '#1A1917'));
+  document.getElementById('habitColor').value = '#22C55E';
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === '#22C55E'));
+  setIconPickerValue('star');
   document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
   const sl = document.getElementById('subTaskList');
   sl.innerHTML = '';
@@ -1770,7 +1901,8 @@ function saveHabit() {
   const name = document.getElementById('habitName').value.trim();
   if (!name) { showAlert('Nama habit tidak boleh kosong!', 'warning', 'Perhatian'); return; }
   const category = document.getElementById('habitCategory').value || 'General';
-  const color = document.getElementById('habitColor').value || '#1A1917';
+  const color = document.getElementById('habitColor').value || '#22C55E';
+  const icon = document.getElementById('habitIcon').value || 'star';
   const subTasks = [];
   document.querySelectorAll('.sub-input-row').forEach((row, i) => {
     const val = row.querySelector('.sub-name').value.trim();
@@ -1785,9 +1917,9 @@ function saveHabit() {
   // Kosong = setiap hari (tidak ada filter)
 
   if (editHabitIdx !== null) {
-    habits[editHabitIdx] = { ...habits[editHabitIdx], name, category, color, subTasks, activeDays };
+    habits[editHabitIdx] = { ...habits[editHabitIdx], name, category, color, icon, subTasks, activeDays };
   } else {
-    habits.push({ name, category, color, subTasks, history: {}, collapsed: false, activeDays });
+    habits.push({ name, category, color, icon, subTasks, history: {}, collapsed: false, activeDays });
   }
   save(); closeModal('habitModal'); renderHabits();
 }
@@ -1982,7 +2114,37 @@ function updateTodoStats() {
   }).join('');
 }
 
-// ===== DRAG & DROP =====
+// ===== MIGRASI DATA LAMA =====
+// Konversi history format lama (string[]) ke format baru ({id,text}[])
+function migrateHistory() {
+  let changed = false;
+  habits.forEach(h => {
+    if (!h.history) return;
+    Object.keys(h.history).forEach(ds => {
+      const log = h.history[ds];
+      if (!Array.isArray(log)) return;
+      const needsMigration = log.some(e => typeof e === 'string');
+      if (!needsMigration) return;
+
+      h.history[ds] = log.map(entry => {
+        if (typeof entry !== 'string') return entry; // sudah format baru
+        const id = entry;
+        let text = id;
+        if (id === 'main') {
+          text = h.name;
+        } else {
+          const sub = (h.subTasks || []).find(s => s.id === id);
+          text = sub ? sub.text : id;
+        }
+        return { id, text };
+      });
+      changed = true;
+    });
+  });
+  if (changed) save();
+}
+
+
 let dragSrc = null;
 let dragType = null; // 'habit' | 'todo'
 let autoScrollRAF = null;
@@ -2007,22 +2169,26 @@ function onDragStart(e) {
   const endEv = isTouchEvent ? 'touchend' : 'mouseup';
 
   let lastOver = null;
-  let currentY = 0;
+  // Inisialisasi currentY dari posisi jari asli — bukan 0!
+  const initTouch = isTouchEvent ? e.touches[0] : e;
+  let currentY = initTouch.clientY;
+  let hasMoved = false;
 
   // ── Auto-scroll: jalankan loop RAF selama drag ──
   const SCROLL_ZONE = 80;  // px dari tepi layar mulai scroll
   const SCROLL_SPEED = 8;  // px per frame
 
   function autoScroll() {
-    const vh = window.innerHeight;
-    if (currentY < SCROLL_ZONE) {
-      // Mendekati atas — scroll up, makin cepat makin dekat tepi
-      const speed = SCROLL_SPEED * (1 - currentY / SCROLL_ZONE);
-      window.scrollBy(0, -speed);
-    } else if (currentY > vh - SCROLL_ZONE) {
-      // Mendekati bawah — scroll down
-      const speed = SCROLL_SPEED * ((currentY - (vh - SCROLL_ZONE)) / SCROLL_ZONE);
-      window.scrollBy(0, speed);
+    // Jangan scroll kalau jari belum bergerak
+    if (hasMoved) {
+      const vh = window.innerHeight;
+      if (currentY < SCROLL_ZONE) {
+        const speed = SCROLL_SPEED * (1 - currentY / SCROLL_ZONE);
+        window.scrollBy(0, -speed);
+      } else if (currentY > vh - SCROLL_ZONE) {
+        const speed = SCROLL_SPEED * ((currentY - (vh - SCROLL_ZONE)) / SCROLL_ZONE);
+        window.scrollBy(0, speed);
+      }
     }
     autoScrollRAF = requestAnimationFrame(autoScroll);
   }
@@ -2032,6 +2198,7 @@ function onDragStart(e) {
     ev.preventDefault();
     const touch = isTouchEvent ? ev.touches[0] : ev;
     currentY = touch.clientY;
+    hasMoved = true;
 
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!el) return;
@@ -2132,6 +2299,64 @@ function closeModal(id) {
 }
 
 // ===== STATS =====
+// ===== HABIT ICONS =====
+const HABIT_ICONS = {
+  star:      `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+  dumbbell:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 9.5h3v5H3zM18 9.5h3v5h-3z"/></svg>`,
+  book:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`,
+  briefcase: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>`,
+  film:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>`,
+  apple:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20.94c1.5 0 4-1.73 4-6.94 0-4-3-7-4-7s-4 3-4 7c0 5.21 2.5 6.94 4 6.94z"/><path d="M12 7c0 0 1-4 4-4"/></svg>`,
+  moon:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`,
+  feather:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>`,
+  dollar:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>`,
+  gamepad:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 12h.01M18 12h.01"/></svg>`,
+  walk:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="4" r="1.5"/><path d="M9 8l-2 5h3l1 5M15 8l2 5h-3l-1 5M9 8l3 2 3-2"/></svg>`,
+  heart:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+};
+
+function getHabitIcon(key) {
+  return HABIT_ICONS[key] || HABIT_ICONS['star'];
+}
+
+function initIconPicker() {
+  document.querySelectorAll('.icon-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.icon-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('habitIcon').value = btn.dataset.icon;
+    });
+  });
+}
+
+function setIconPickerValue(iconKey) {
+  document.querySelectorAll('.icon-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.icon === iconKey);
+  });
+  document.getElementById('habitIcon').value = iconKey || 'star';
+}
+
+// Helper: cek apakah warna terlalu gelap atau terlalu terang
+function isDarkColor(hex) {
+  if (!hex || hex.length < 6) return false;
+  const c = hex.replace('#','');
+  const r = parseInt(c.substr(0,2),16);
+  const g = parseInt(c.substr(2,2),16);
+  const b = parseInt(c.substr(4,2),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b);
+  return lum < 80; // gelap kalau luminance < 80
+}
+
+function isLightColor(hex) {
+  if (!hex || hex.length < 6) return false;
+  const c = hex.replace('#','');
+  const r = parseInt(c.substr(0,2),16);
+  const g = parseInt(c.substr(2,2),16);
+  const b = parseInt(c.substr(4,2),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b);
+  return lum > 200; // terang kalau luminance > 200
+}
+
 // Helper: cek apakah habit dijadwalkan di tanggal tertentu
 function isHabitScheduled(h, dateStr) {
   const activeDays = h.activeDays || [];
@@ -2265,17 +2490,23 @@ function renderCalendar() {
 
     // Kumpulkan habit yang aktif hari ini
     let acts = [];
-    let activeHabits = []; // [{color}]
+    let activeHabits = [];
     habits.forEach(h => {
       if (h.history[ds] && h.history[ds].length > 0) {
         el.classList.add('has-data');
         totalAct += h.history[ds].length;
         activeHabits.push(h.color);
-        h.history[ds].forEach(id => {
-          if (id === 'main') acts.push(h.name);
-          else {
-            const sub = h.subTasks?.find(s => s.id === id);
-            if (sub) acts.push(`${h.name} — ${sub.text}`);
+        h.history[ds].forEach(entry => {
+          // Support format lama (string) dan baru (object {id, text})
+          const id = typeof entry === 'string' ? entry : entry.id;
+          const snapText = typeof entry === 'object' && entry.text ? entry.text : null;
+
+          if (id === 'main') {
+            acts.push(snapText || h.name);
+          } else {
+            // Pakai snapshot text kalau ada, fallback ke subtask saat ini
+            const fallback = h.subTasks?.find(s => s.id === id);
+            acts.push(`${h.name} — ${snapText || (fallback ? fallback.text : id)}`);
           }
         });
       }
@@ -2375,6 +2606,7 @@ async function resetAll() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   load();
+  migrateHistory(); // konversi data lama ke format baru
   updateTopDate();
   renderHabits();
   renderTodos();
@@ -2414,6 +2646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Day picker
   initDayPicker();
+  initIconPicker();
 
   // Drag & drop
   initDragDrop();
@@ -2788,12 +3021,19 @@ function updateNotifUI() {
   const permBtn = document.getElementById('btnNotifPermission');
   if (!statusEl || !permBtn) return;
 
+  // Guard: Notification API tidak tersedia (file://, HTTP, atau browser lama)
+  if (!('Notification' in window)) {
+    statusEl.textContent = 'Tidak didukung di browser ini';
+    permBtn.textContent = 'Tidak Tersedia';
+    permBtn.disabled = true;
+    return;
+  }
+
   const perm = Notification.permission;
   if (perm === 'granted') {
     statusEl.textContent = 'Aktif ✓';
     permBtn.textContent = 'Aktif';
     permBtn.disabled = true;
-    // Load saved times
     const habitTime = localStorage.getItem('notif_habit_time') || '07:00';
     const todoTime  = localStorage.getItem('notif_todo_time')  || '15:00';
     document.getElementById('notifHabitTime').value = habitTime;
@@ -2835,7 +3075,7 @@ function getMsUntilTime(timeStr) {
 }
 
 function scheduleAllNotifications() {
-  if (!swReg || Notification.permission !== 'granted') return;
+  if (!swReg || !('Notification' in window) || Notification.permission !== 'granted') return;
 
   const habitTime = localStorage.getItem('notif_habit_time') || '07:00';
   const todoTime  = localStorage.getItem('notif_todo_time')  || '15:00';
@@ -2874,7 +3114,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn  = document.getElementById('btnNotifSave');
   if (permBtn) permBtn.onclick = requestNotifPermission;
   if (saveBtn) saveBtn.onclick = saveNotifSettings;
-  updateNotifUI();
+  try { updateNotifUI(); } catch(e) {}
 
   // Update theme-color meta ikut dark mode
   const observer = new MutationObserver(() => {

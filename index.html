@@ -532,9 +532,9 @@
       position: relative;
     }
     .cal-day:hover { background: var(--surface2); }
-    .cal-day.today { background: var(--text); color: white; font-weight: 600; }
+    .cal-day.today { background: var(--text); color: var(--bg); font-weight: 600; }
     .cal-day.has-data { color: var(--text); font-weight: 500; }
-    .cal-day.today.has-data { background: var(--text); color: white; }
+    .cal-day.today.has-data { background: var(--text); color: var(--bg); }
     .cal-day.empty { cursor: default; }
     /* Titik indikator habit */
     .cal-dot {
@@ -543,7 +543,7 @@
       background: var(--text);
       flex-shrink: 0;
     }
-    .cal-day.today .cal-dot { background: white; }
+    .cal-day.today .cal-dot { background: var(--bg); }
 
     .cal-detail {
       margin-top: 12px;

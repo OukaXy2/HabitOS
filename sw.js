@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dailyos-v5';
+const CACHE_NAME = 'dailyos-v6';
 const ASSETS = [
   './app.html',
   './manifest.json',

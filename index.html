@@ -119,7 +119,7 @@
       background: var(--surface);
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       padding: 6px 0 20px;
       z-index: 100;
     }
@@ -814,6 +814,167 @@
     .todo-section-label.normal::before { background: var(--normal); }
     .todo-section-label.done-lbl::before { background: var(--border); }
     .todo-section-label:first-of-type { margin-top: 0; }
+
+    /* ===== AI PANEL ===== */
+    .ai-section-label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-3); font-family: 'DM Mono', monospace;
+      margin-bottom: 10px;
+    }
+    .ai-coach-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .habit-preview-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0; border-bottom: 1px solid var(--border);
+    }
+    .habit-preview-row:last-child { border-bottom: none; }
+    .hp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .hp-name { flex: 1; font-size: 13px; font-weight: 500; }
+    .hp-streak { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+    .hp-badge {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .hp-done { background: #e8f5e9; color: #2e7d32; }
+    .hp-miss { background: var(--surface2); color: var(--text-3); }
+    body.dark .hp-done { background: #0d2e0f; color: #66bb6a; }
+
+    .btn-ai-action {
+      width: 100%; padding: 12px;
+      background: var(--accent); color: var(--accent-fg);
+      border: none; border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn-ai-action:hover { opacity: 0.85; }
+    .btn-ai-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .ai-response-card {
+      background: #F0F7F0; border: 1px solid #C8E0C9;
+      border-radius: var(--radius); padding: 14px 16px;
+      display: none; animation: aiFadeIn 0.2s ease;
+      margin-bottom: 12px;
+    }
+    body.dark .ai-response-card { background: #0A150A; border-color: #1E3A1F; }
+    .ai-response-card.visible { display: block; }
+    @keyframes aiFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+    .ai-resp-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .ai-resp-avatar {
+      width: 26px; height: 26px; background: #2C5F2E;
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    body.dark .ai-resp-avatar { background: #3a7d3c; }
+    .ai-resp-avatar svg { width: 14px; height: 14px; color: white; }
+    .ai-resp-label { font-size: 11px; font-weight: 600; color: #2C5F2E; font-family: 'DM Mono', monospace; }
+    body.dark .ai-resp-label { color: #5BA85E; }
+    .ai-resp-text { font-size: 13.5px; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
+
+    .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+    .loading-dots span {
+      width: 5px; height: 5px; background: #2C5F2E; border-radius: 50%;
+      animation: ldBlink 1.2s infinite;
+    }
+    body.dark .loading-dots span { background: #5BA85E; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ldBlink { 0%,80%,100%{opacity:0.2;} 40%{opacity:1;} }
+
+    /* Smart Todo */
+    .smart-todo-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+      margin-bottom: 12px; box-shadow: var(--shadow);
+    }
+    .smart-input-label {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      font-family: 'DM Mono', monospace; text-transform: uppercase;
+      letter-spacing: 0.7px; margin-bottom: 8px; display: block;
+    }
+    .smart-textarea {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px; color: var(--text);
+      font-size: 14px; font-family: 'DM Sans', sans-serif;
+      outline: none; resize: none; height: 70px;
+      transition: border-color 0.12s; line-height: 1.5;
+    }
+    .smart-textarea:focus { border-color: var(--text-2); }
+    .smart-textarea::placeholder { color: var(--text-3); }
+    .example-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+    .chip {
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 11.5px; color: var(--text-2); cursor: pointer;
+      transition: all 0.12s; font-family: 'DM Sans', sans-serif;
+    }
+    .chip:hover { background: var(--border); color: var(--text); }
+
+    .parsed-result {
+      background: #F0F7F0; border: 1px solid #C8E0C9;
+      border-radius: var(--radius); padding: 14px 16px;
+      display: none; margin-bottom: 10px; animation: aiFadeIn 0.2s ease;
+    }
+    body.dark .parsed-result { background: #0A150A; border-color: #1E3A1F; }
+    .parsed-result.visible { display: block; }
+
+    .parsed-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 6px 0; border-bottom: 1px solid #C8E0C9;
+    }
+    body.dark .parsed-row { border-bottom-color: #1E3A1F; }
+    .parsed-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .parsed-key {
+      font-size: 10px; font-weight: 600; color: #2C5F2E;
+      font-family: 'DM Mono', monospace; text-transform: uppercase;
+      letter-spacing: 0.5px; width: 68px; flex-shrink: 0; padding-top: 1px;
+    }
+    body.dark .parsed-key { color: #5BA85E; }
+    .parsed-val { font-size: 13.5px; color: var(--text); line-height: 1.5; flex: 1; }
+    .pv-urgent { color: var(--urgent); font-weight: 600; }
+    .pv-soon { color: var(--soon); font-weight: 600; }
+    .pv-normal { color: var(--normal); font-weight: 600; }
+    .subtask-dots { display: flex; flex-direction: column; gap: 4px; }
+    .subtask-dot-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-2); }
+    .subtask-dot-item::before { content:''; width:5px;height:5px;border-radius:50%;background:#2C5F2E;flex-shrink:0; }
+    body.dark .subtask-dot-item::before { background:#5BA85E; }
+
+    .btn-confirm-add {
+      width: 100%; padding: 11px;
+      background: #2C5F2E; color: white;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s; display: none;
+    }
+    body.dark .btn-confirm-add { background: #3a7d3c; }
+    .btn-confirm-add.visible { display: block; }
+    .btn-confirm-add:hover { opacity: 0.85; }
+    .add-success {
+      background: #F0F7F0; border: 1px solid #C8E0C9;
+      border-radius: var(--radius-sm); padding: 9px 13px;
+      font-size: 13px; color: #2C5F2E; font-weight: 500;
+      display: none; margin-top: 8px; text-align: center;
+    }
+    body.dark .add-success { background:#0A150A;border-color:#1E3A1F;color:#5BA85E; }
+    .add-success.visible { display: block; animation: aiFadeIn 0.2s ease; }
+    .ai-note {
+      background: var(--surface2); border-radius: var(--radius-sm);
+      padding: 9px 12px; font-size: 12px; color: var(--text-3);
+      margin-top: 10px; line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -1000,6 +1161,69 @@
   </div>
 </div>
 
+<!-- AI View -->
+<div id="viewAi" class="view">
+
+  <!-- AI COACH -->
+  <div class="ai-section-label">AI Coach — Briefing Harian</div>
+  <div class="ai-coach-card" id="aiHabitPreview">
+    <div style="font-size:12px;color:var(--text-3);text-align:center;padding:10px 0">Belum ada habit. Tambah habit dulu di tab Habit.</div>
+  </div>
+
+  <button class="btn-ai-action" id="btnCoach" onclick="getAICoach()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    Minta Briefing dari AI Coach
+  </button>
+
+  <div class="ai-response-card" id="coachCard">
+    <div class="ai-resp-header">
+      <div class="ai-resp-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </div>
+      <span class="ai-resp-label">AI COACH</span>
+    </div>
+    <div class="ai-resp-text" id="coachText"></div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:16px 0"></div>
+
+  <!-- SMART TODO -->
+  <div class="ai-section-label">Smart To-Do — Input Natural</div>
+  <div class="smart-todo-wrap">
+    <span class="smart-input-label">Ketik todo dalam bahasa natural</span>
+    <textarea class="smart-textarea" id="smartInput" placeholder="Contoh: besok presentasi ke klien jam 10, persiapkan slide dulu..."></textarea>
+    <div class="example-chips">
+      <span class="chip" onclick="setChip(this)">deadline laporan akhir bulan</span>
+      <span class="chip" onclick="setChip(this)">besok meeting investor jam 10</span>
+      <span class="chip" onclick="setChip(this)">beli kado mama minggu depan</span>
+      <span class="chip" onclick="setChip(this)">cicil belajar figma pelan-pelan</span>
+    </div>
+    <button class="btn-ai-action" id="btnSmartParse" onclick="parseSmartTodo()" style="margin-bottom:0">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Parse dengan AI
+    </button>
+  </div>
+
+  <div class="parsed-result" id="parsedResult">
+    <div class="ai-resp-header">
+      <div class="ai-resp-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <span class="ai-resp-label">HASIL PARSE</span>
+    </div>
+    <div id="parsedFields"></div>
+  </div>
+
+  <button class="btn-confirm-add" id="btnConfirmAdd" onclick="confirmAddTodo()">
+    + Tambahkan ke To-Do
+  </button>
+  <div class="add-success" id="addSuccess">✓ Task berhasil ditambahkan!</div>
+
+  <div class="ai-note">
+    💡 AI membaca teks natural dan otomatis menentukan judul, deadline, priority, dan subtask. Pastikan Worker AI sudah aktif.
+  </div>
+</div>
+
 <!-- FAB -->
 <button class="fab" id="fabBtn">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1019,9 +1243,13 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
     Statistik
   </button>
+  <button class="nav-item" id="navAi" onclick="switchView('ai')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    AI
+  </button>
   <button class="nav-item" id="navSettings" onclick="switchView('settings')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    Pengaturan
+    Setting
   </button>
 </nav>
 
@@ -1197,9 +1425,11 @@ function updateTopDate() {
 // ===== VIEW SWITCH =====
 function switchView(v) {
   currentView = v;
-  ['habit','todo','stats','settings'].forEach(name => {
-    document.getElementById('view'+cap(name)).classList.remove('active');
-    document.getElementById('nav'+cap(name)).classList.remove('active');
+  ['habit','todo','stats','settings','ai'].forEach(name => {
+    const view = document.getElementById('view'+cap(name));
+    const nav = document.getElementById('nav'+cap(name));
+    if (view) view.classList.remove('active');
+    if (nav) nav.classList.remove('active');
   });
   document.getElementById('view'+cap(v)).classList.add('active');
   document.getElementById('nav'+cap(v)).classList.add('active');
@@ -1209,6 +1439,7 @@ function switchView(v) {
   else fab.classList.add('hidden');
 
   if (v === 'stats') { updateStats(); renderCalendar(); setTimeout(renderChart, 100); }
+  if (v === 'ai') renderAIHabitPreview();
 }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
@@ -1913,7 +2144,213 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ===== NOTIFICATION HELPERS =====
+// ===== AI FEATURES =====
+const WORKER_URL = 'https://dailyos-ai.mywisnu238.workers.dev';
+
+// Render habit preview di panel AI
+function renderAIHabitPreview() {
+  const el = document.getElementById('aiHabitPreview');
+  if (!el) return;
+  if (habits.length === 0) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:10px 0">Belum ada habit. Tambah habit dulu di tab Habit.</div>';
+    return;
+  }
+  const today = getToday();
+  let html = '';
+  habits.forEach(h => {
+    const log = h.history?.[today] || [];
+    const total = (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
+    const done = log.length;
+    const isDone = done >= total;
+    // Hitung streak
+    let streak = 0;
+    let sd = new Date(today + 'T00:00:00');
+    for (let i = 0; i < 365; i++) {
+      const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
+      if (h.history?.[ds] && h.history[ds].length > 0) { streak++; sd.setDate(sd.getDate()-1); }
+      else if (ds === today) { sd.setDate(sd.getDate()-1); }
+      else break;
+    }
+    html += `<div class="habit-preview-row">
+      <div class="hp-dot" style="background:${h.color}"></div>
+      <div style="flex:1">
+        <div class="hp-name">${h.name}</div>
+        <div class="hp-streak">${streak > 0 ? '🔥 ' + streak + ' hari' : '—'}</div>
+      </div>
+      <span class="hp-badge ${isDone ? 'hp-done' : 'hp-miss'}">${isDone ? '✓ Done' : 'Belum'}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+async function callWorker(payload) {
+  const resp = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!resp.ok) throw new Error('Worker error ' + resp.status);
+  const data = await resp.json();
+  return data.text || '';
+}
+
+// AI COACH
+async function getAICoach() {
+  const btn = document.getElementById('btnCoach');
+  const card = document.getElementById('coachCard');
+  const textEl = document.getElementById('coachText');
+
+  btn.disabled = true;
+  btn.textContent = 'Memuat...';
+  card.classList.add('visible');
+  textEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+  const today = getToday();
+  const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const activeTodos = todos.filter(t => !t.done);
+
+  // Siapkan ringkasan habit
+  const habitSummary = habits.map(h => {
+    const log = h.history?.[today] || [];
+    const total = (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
+    const done = log.length;
+    let streak = 0;
+    let sd = new Date(today + 'T00:00:00');
+    for (let i = 0; i < 365; i++) {
+      const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
+      if (h.history?.[ds] && h.history[ds].length > 0) { streak++; sd.setDate(sd.getDate()-1); }
+      else if (ds === today) { sd.setDate(sd.getDate()-1); }
+      else break;
+    }
+    return `- ${h.name} | Streak: ${streak} hari | Status: ${done >= total ? 'SELESAI ✓' : 'BELUM ('+done+'/'+total+')'}`;
+  }).join('\n');
+
+  const todoSummary = activeTodos.length > 0
+    ? activeTodos.map(t => `- [${t.priority.toUpperCase()}] ${t.title}${t.deadline?' (deadline: '+formatDate(t.deadline)+')':''}`).join('\n')
+    : '(tidak ada task aktif)';
+
+  const prompt = `Kamu adalah AI Coach di aplikasi Daily OS. Berikan briefing harian yang personal, singkat, dan memotivasi dalam bahasa Indonesia yang santai.
+
+Tanggal: ${todayLabel}
+
+HABIT HARI INI:
+${habitSummary || '(belum ada habit)'}
+
+TO-DO AKTIF:
+${todoSummary}
+
+Tugas kamu:
+- Apresiasi habit yang sudah selesai (singkat)
+- Ingatkan habit yang belum, terutama yang streaknya tinggi
+- Singgung task to-do yang mendesak jika ada
+- Kasih 1 motivasi atau saran konkret
+- Maksimal 5 kalimat, santai, seperti pesan dari teman. Jangan pakai bullet point.`;
+
+  try {
+    const text = await callWorker({ prompt, system: 'Kamu adalah AI Coach produktivitas yang ramah dan memotivasi. Jawab dalam bahasa Indonesia yang santai.' });
+    textEl.textContent = text;
+  } catch(err) {
+    textEl.textContent = 'Gagal menghubungi AI Worker. Pastikan Worker sudah aktif dan GROQ_API_KEY sudah diset.';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Refresh Briefing`;
+}
+
+// SMART TODO
+window.setChip = function(el) {
+  document.getElementById('smartInput').value = el.textContent;
+};
+
+let parsedTodoData = null;
+
+async function parseSmartTodo() {
+  const input = document.getElementById('smartInput').value.trim();
+  if (!input) { document.getElementById('smartInput').focus(); return; }
+
+  const btn = document.getElementById('btnSmartParse');
+  const result = document.getElementById('parsedResult');
+  const addBtn = document.getElementById('btnConfirmAdd');
+  const success = document.getElementById('addSuccess');
+
+  btn.disabled = true;
+  btn.textContent = 'Memproses...';
+  result.classList.remove('visible');
+  addBtn.classList.remove('visible');
+  success.classList.remove('visible');
+  parsedTodoData = null;
+
+  const todayLabel = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const prompt = `Ekstrak informasi todo dari teks berikut dan return HANYA JSON tanpa penjelasan tanpa backtick.
+
+Hari ini: ${todayLabel}
+Teks: "${input}"
+
+Format JSON:
+{"judul":"string max 60 karakter","deadline":"DD MMM YYYY atau null","priority":"urgent|soon|normal","alasan":"1 kalimat singkat","subtasks":["string"] atau []}
+
+Aturan priority: urgent=hari ini/besok, soon=2-7 hari, normal=lebih dari seminggu.
+Subtasks: max 3, isi hanya jika ada aktivitas persiapan jelas di teks.`;
+
+  try {
+    const raw = await callWorker({ prompt, system: 'Kamu adalah parser JSON. Return HANYA JSON valid tanpa teks lain, tanpa backtick, tanpa markdown.' });
+    const clean = raw.replace(/```json|```/g,'').trim();
+    parsedTodoData = JSON.parse(clean);
+
+    const priClass = { urgent:'pv-urgent', soon:'pv-soon', normal:'pv-normal' }[parsedTodoData.priority] || '';
+    const priLabel = { urgent:'🔴 Urgent — Hari Ini', soon:'🟡 Soon — Minggu Ini', normal:'🟢 Normal — Nanti' }[parsedTodoData.priority] || parsedTodoData.priority;
+    const subsHtml = parsedTodoData.subtasks?.length > 0
+      ? `<div class="subtask-dots">${parsedTodoData.subtasks.map(s=>`<div class="subtask-dot-item">${s}</div>`).join('')}</div>`
+      : `<span style="color:var(--text-3)">Tidak ada</span>`;
+
+    document.getElementById('parsedFields').innerHTML = `
+      <div class="parsed-row"><span class="parsed-key">Judul</span><span class="parsed-val">${parsedTodoData.judul||'-'}</span></div>
+      <div class="parsed-row"><span class="parsed-key">Deadline</span><span class="parsed-val">${parsedTodoData.deadline||'—'}</span></div>
+      <div class="parsed-row"><span class="parsed-key">Priority</span><span class="parsed-val ${priClass}">${priLabel}</span></div>
+      <div class="parsed-row"><span class="parsed-key">Alasan</span><span class="parsed-val" style="color:var(--text-2)">${parsedTodoData.alasan||''}</span></div>
+      <div class="parsed-row"><span class="parsed-key">Subtasks</span><span class="parsed-val">${subsHtml}</span></div>
+    `;
+    result.classList.add('visible');
+    addBtn.classList.add('visible');
+  } catch(err) {
+    document.getElementById('parsedFields').innerHTML = `<div style="font-size:13px;color:var(--text-2)">Gagal parse. Coba tulis ulang dengan lebih jelas, atau cek koneksi Worker.</div>`;
+    result.classList.add('visible');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Parse dengan AI`;
+}
+
+function confirmAddTodo() {
+  if (!parsedTodoData) return;
+  // Konversi deadline ke format YYYY-MM-DD
+  let deadlineISO = '';
+  if (parsedTodoData.deadline) {
+    try {
+      const d = new Date(parsedTodoData.deadline);
+      if (!isNaN(d)) deadlineISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    } catch {}
+  }
+  todos.unshift({
+    id: `todo_${Date.now()}`,
+    title: parsedTodoData.judul,
+    priority: parsedTodoData.priority || 'normal',
+    deadline: deadlineISO,
+    done: false
+  });
+  save();
+  renderTodos();
+
+  document.getElementById('btnConfirmAdd').classList.remove('visible');
+  document.getElementById('addSuccess').classList.add('visible');
+  document.getElementById('smartInput').value = '';
+  document.getElementById('parsedResult').classList.remove('visible');
+  parsedTodoData = null;
+  setTimeout(() => document.getElementById('addSuccess').classList.remove('visible'), 3000);
+}
+
+
 function updateNotifUI() {
   const statusEl = document.getElementById('notifStatusText');
   const permBtn = document.getElementById('btnNotifPermission');

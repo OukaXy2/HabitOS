@@ -2554,8 +2554,60 @@ function showCalDetail(ds, items, day) {
       list.appendChild(li);
     });
   }
+
+  // Tombol clear — hanya tampil kalau ada data
+  let clearBtn = document.getElementById('calClearBtn');
+  if (!clearBtn) {
+    clearBtn = document.createElement('button');
+    clearBtn.id = 'calClearBtn';
+    clearBtn.className = 'btn-sm danger';
+    clearBtn.style.cssText = 'margin-top:12px;width:100%;font-size:12px;';
+    d.appendChild(clearBtn);
+  }
+
+  if (items.length > 0) {
+    clearBtn.textContent = 'Hapus Data Hari Ini';
+    clearBtn.onclick = () => clearDayHistory(ds);
+    clearBtn.style.display = 'block';
+  } else {
+    clearBtn.style.display = 'none';
+  }
+
   d.classList.remove('hidden');
 }
+
+// ===== CLEAR HISTORY PER TANGGAL =====
+window.clearDayHistory = async function(ds) {
+  const date = new Date(ds + 'T00:00:00');
+  const label = date.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long' });
+  const ok = await showConfirm(
+    `Semua data aktivitas pada ${label} akan dihapus permanen.`,
+    'error',
+    'Hapus Data Hari Ini?'
+  );
+  if (!ok) return;
+
+  let removed = 0;
+  habits.forEach(h => {
+    if (h.history && h.history[ds]) {
+      removed += h.history[ds].length;
+      delete h.history[ds];
+    }
+  });
+
+  save();
+  if (currentView === 'stats') { updateStats(); renderCalendar(); }
+
+  document.getElementById('calDetail').classList.add('hidden');
+
+  showAlert(
+    removed > 0
+      ? `${removed} aktivitas pada ${label} berhasil dihapus.`
+      : `Tidak ada data di tanggal tersebut.`,
+    'success',
+    'Selesai'
+  );
+};
 
 // ===== SETTINGS =====
 function exportData() {

@@ -1114,6 +1114,48 @@
       padding: 9px 12px; font-size: 12px; color: var(--text-3);
       margin-top: 10px; line-height: 1.5;
     }
+
+    /* Rekomendasi AI */
+    .smart-btn-row { display: flex; gap: 8px; }
+    .smart-btn-row .btn-ai-action { flex: 1; margin-bottom: 0; }
+    .btn-ai-secondary {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-ai-secondary:hover { background: var(--border); color: var(--text); }
+    .rekom-result {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: none; margin-bottom: 10px;
+      animation: aiFadeIn 0.2s ease;
+    }
+    .rekom-result.visible { display: block; }
+    .rekom-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .rekom-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rekom-item:first-child { padding-top: 0; }
+    .rekom-title { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+    .rekom-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .rekom-reason { font-size: 11.5px; color: var(--text-3); margin-top: 4px; line-height: 1.4; font-style: italic; }
+    .btn-confirm-rekom {
+      width: 100%; padding: 11px;
+      background: var(--accent); color: var(--accent-fg);
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s; display: none;
+    }
+    .btn-confirm-rekom.visible { display: block; }
+    .btn-confirm-rekom:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -1365,11 +1407,31 @@
       <span class="chip" onclick="setChip(this)">beli kado mama minggu depan</span>
       <span class="chip" onclick="setChip(this)">cicil belajar figma pelan-pelan</span>
     </div>
-    <button class="btn-ai-action" id="btnSmartParse" onclick="parseSmartTodo()" style="margin-bottom:0">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Parse dengan AI
-    </button>
+    <div class="smart-btn-row">
+      <button class="btn-ai-action" id="btnSmartParse" onclick="parseSmartTodo()" style="margin-bottom:0">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Parse dengan AI
+      </button>
+      <button class="btn-ai-secondary" id="btnRekom" onclick="getAIRecommendations()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Rekomendasi AI
+      </button>
+    </div>
   </div>
+
+  <div class="rekom-result" id="rekomResult">
+    <div class="ai-resp-header">
+      <div class="ai-resp-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <span class="ai-resp-label">REKOMENDASI TASK</span>
+    </div>
+    <div id="rekomFields"></div>
+  </div>
+  <button class="btn-confirm-rekom" id="btnConfirmRekom" onclick="confirmAddRekom()">+ Tambahkan Rekomendasi ke To-Do</button>
+  <div class="add-success" id="rekomSuccess">✓ Task berhasil ditambahkan!</div>
+
+  <div style="height:1px;background:var(--border);margin:16px 0"></div>
 
   <div class="parsed-result" id="parsedResult">
     <div class="ai-resp-header">
@@ -1626,10 +1688,21 @@ function save() {
 function load() {
   const h = localStorage.getItem('dailyos_habits');
   const t = localStorage.getItem('dailyos_todos');
-  const p = localStorage.getItem('dailyos_xp');
   if (h) habits = JSON.parse(h);
   if (t) todos = JSON.parse(t);
-  if (p) totalPoints = parseInt(p);
+  // Selalu recalculate dari history, jangan percaya angka tersimpan
+  totalPoints = recalculateXP();
+}
+
+// Hitung ulang XP dari seluruh history habit
+function recalculateXP() {
+  let total = 0;
+  habits.forEach(h => {
+    Object.values(h.history || {}).forEach(log => {
+      total += Array.isArray(log) ? log.length * 10 : 0;
+    });
+  });
+  return total;
 }
 
 // ===== DATE =====
@@ -1841,7 +1914,7 @@ window.toggleMenu = function(e, idx) {
 
 window.deleteHabit = async function(idx) {
   const ok = await showConfirm('Habit ini akan dihapus permanen.', 'error', 'Hapus Habit?');
-  if (ok) { habits.splice(idx, 1); save(); renderHabits(); showAlert('Habit berhasil dihapus.', 'success', 'Terhapus'); }
+  if (ok) { habits.splice(idx, 1); totalPoints = recalculateXP(); save(); renderHabits(); showAlert('Habit berhasil dihapus.', 'success', 'Terhapus'); }
 };
 
 window.editHabit = function(idx) {
@@ -2611,11 +2684,18 @@ window.clearDayHistory = async function(ds) {
 
 // ===== SETTINGS =====
 function exportData() {
+  let coachMemory = null;
+  try {
+    const raw = localStorage.getItem('dailyos_coach_memory');
+    if (raw) coachMemory = JSON.parse(raw);
+  } catch {}
+
   const data = {
     version: 2,
     habits,
     todos,
     totalPoints,
+    coachMemory: coachMemory || undefined,
     exportedAt: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2654,6 +2734,8 @@ async function resetAll() {
     localStorage.removeItem('dailyos_habits');
     localStorage.removeItem('dailyos_todos');
     localStorage.removeItem('dailyos_xp');
+    localStorage.removeItem('dailyos_coach_memory');
+    localStorage.removeItem('dailyos_memory_date');
     renderHabits(); renderTodos(); updateXP();
     switchView('habit');
     setTimeout(() => showAlert('Semua data telah direset.', 'success', 'Selesai'), 300);
@@ -2780,6 +2862,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Restore XP
         totalPoints = typeof data.totalPoints === 'number' ? data.totalPoints : 0;
 
+        // Restore coach memory kalau ada
+        if (data.coachMemory && typeof data.coachMemory === 'object') {
+          localStorage.setItem('dailyos_coach_memory', JSON.stringify(data.coachMemory));
+          if (data.coachMemory.lastUpdated) {
+            localStorage.setItem('dailyos_memory_date', data.coachMemory.lastUpdated);
+          }
+        }
+
         save();
         renderHabits();
         renderTodos();
@@ -2874,6 +2964,147 @@ async function callWorker(payload) {
   return data.text || '';
 }
 
+// ===== COACH MEMORY SYSTEM =====
+
+function getHabitStats30Days() {
+  const today = getToday();
+  const result = [];
+
+  habits.forEach(h => {
+    const scheduledDays = [];
+    const completedDays = [];
+    const skipDays = [];
+
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today + 'T00:00:00');
+      d.setDate(d.getDate() - i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const scheduled = isHabitScheduled(h, ds);
+      if (!scheduled) continue;
+
+      scheduledDays.push(ds);
+      const log = h.history?.[ds] || [];
+      const total = (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
+      if (log.length >= total) completedDays.push(ds);
+      else if (ds !== today) skipDays.push(ds); // hari ini belum tentu skip
+    }
+
+    const rate = scheduledDays.length > 0
+      ? Math.round((completedDays.length / scheduledDays.length) * 100)
+      : 0;
+
+    // Hitung streak saat ini
+    let streak = 0;
+    let sd = new Date(today + 'T00:00:00');
+    for (let i = 0; i < 365; i++) {
+      const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
+      if (h.history?.[ds] && h.history[ds].length > 0) { streak++; sd.setDate(sd.getDate()-1); }
+      else if (ds === today) { sd.setDate(sd.getDate()-1); }
+      else break;
+    }
+
+    // Deteksi hari lemah (hari dalam seminggu yang sering skip)
+    const skipByDay = [0,0,0,0,0,0,0];
+    const schedByDay = [0,0,0,0,0,0,0];
+    scheduledDays.forEach(ds => { schedByDay[new Date(ds+'T00:00:00').getDay()]++; });
+    skipDays.forEach(ds => { skipByDay[new Date(ds+'T00:00:00').getDay()]++; });
+    const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const weakDays = schedByDay
+      .map((total, i) => total > 0 ? { day: dayNames[i], rate: Math.round((skipByDay[i]/total)*100) } : null)
+      .filter(x => x && x.rate >= 50)
+      .map(x => x.day);
+
+    result.push({
+      name: h.name,
+      category: h.category || 'General',
+      scheduledCount: scheduledDays.length,
+      completedCount: completedDays.length,
+      skipCount: skipDays.length,
+      completionRate: rate,
+      currentStreak: streak,
+      weakDays: weakDays.length > 0 ? weakDays : null
+    });
+  });
+
+  return result;
+}
+
+async function generateCoachMemory() {
+  if (habits.length === 0) return;
+
+  const stats = getHabitStats30Days();
+  const today = getToday();
+  const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const statsText = stats.map(h =>
+    `- ${h.name} (${h.category}): completion ${h.completionRate}%, streak ${h.currentStreak} hari, skip ${h.skipCount}x dari ${h.scheduledCount} jadwal${h.weakDays ? ', lemah di: '+h.weakDays.join('/') : ''}`
+  ).join('\n');
+
+  const prompt = `Analisis data habit 30 hari terakhir user ini dan buat catatan mentor yang berguna.
+
+Tanggal analisis: ${todayLabel}
+
+DATA HABIT:
+${statsText}
+
+Return HANYA JSON valid tanpa penjelasan, tanpa backtick, tanpa markdown. Format:
+{
+  "patterns": "deskripsi pola konsistensi secara keseluruhan, habit mana yang kuat dan lemah",
+  "weakSpots": "habit atau hari spesifik yang sering di-skip, pola yang perlu diperhatikan",
+  "strengths": "apa yang sudah berjalan baik, streak atau konsistensi yang patut diapresiasi",
+  "coachInsight": "insight untuk coach: cara terbaik mendekati user ini, apakah perlu di-push keras atau didukung, pola avoidance yang terdeteksi",
+  "confidence": "high | medium | low (low kalau data kurang dari 7 hari)"
+}`;
+
+  try {
+    const raw = await callWorker({
+      prompt,
+      system: 'Kamu adalah analis data perilaku. Return HANYA JSON valid tanpa teks lain, tanpa backtick, tanpa markdown.',
+      max_tokens: 500
+    });
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Validasi field wajib ada
+    if (!parsed.patterns || !parsed.coachInsight) throw new Error('Field tidak lengkap');
+
+    parsed.lastUpdated = today;
+    parsed.habitCount = habits.length;
+
+    localStorage.setItem('dailyos_coach_memory', JSON.stringify(parsed));
+    localStorage.setItem('dailyos_memory_date', today);
+    console.log('[CoachMemory] Generated:', parsed);
+  } catch (err) {
+    console.warn('[CoachMemory] Gagal generate memory:', err);
+    // Biarkan memory lama tetap dipakai, jangan overwrite
+  }
+}
+
+async function checkAndRefreshMemory() {
+  const lastDate = localStorage.getItem('dailyos_memory_date');
+  const today = getToday();
+
+  if (!lastDate) {
+    // Belum ada memory sama sekali — generate sekarang tapi jangan block briefing
+    generateCoachMemory(); // fire and forget
+    return null;
+  }
+
+  const d1 = new Date(lastDate + 'T00:00:00');
+  const d2 = new Date(today + 'T00:00:00');
+  const daysSince = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+  if (daysSince >= 3) {
+    generateCoachMemory(); // refresh background, jangan block
+  }
+
+  // Return memory yang ada (meski mungkin agak lama)
+  try {
+    const raw = localStorage.getItem('dailyos_coach_memory');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
 // AI COACH
 async function getAICoach() {
   const refreshBtn = document.getElementById('btnRefreshCoach');
@@ -2896,6 +3127,9 @@ async function getAICoach() {
 
   const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
+  // Cek & refresh memory (background, tidak block)
+  const memory = await checkAndRefreshMemory();
+
   // Siapkan ringkasan habit (hanya yang dijadwalkan hari ini)
   const habitSummary = scheduledHabits.map(h => {
     const log = h.history?.[today] || [];
@@ -2916,25 +3150,30 @@ async function getAICoach() {
     ? activeTodos.map(t => `- [${t.priority.toUpperCase()}] ${t.title}${t.deadline?' (deadline: '+formatDate(t.deadline)+')':''}`).join('\n')
     : '(tidak ada task aktif)';
 
-  const prompt = `Kamu adalah AI Coach di aplikasi Daily OS. Berikan briefing harian yang personal, singkat, dan memotivasi dalam bahasa Indonesia yang santai.
+  // Susun memory section kalau ada
+  const memorySection = memory ? `
+--- CATATAN MENTOR (pola 30 hari terakhir) ---
+Pola umum: ${memory.patterns}
+Titik lemah: ${memory.weakSpots || '-'}
+Yang sudah kuat: ${memory.strengths || '-'}
+Insight: ${memory.coachInsight}
+----------------------------------------------` : '';
 
-Tanggal: ${todayLabel}
+  const prompt = `Hari ini ${todayLabel}.
 
-HABIT HARI INI:
-${habitSummary || '(belum ada habit yang dijadwalkan hari ini)'}
+HABIT TERJADWAL HARI INI:
+${habitSummary || '(tidak ada habit dijadwalkan hari ini)'}
 
 TO-DO AKTIF:
 ${todoSummary}
+${memorySection}
 
-Tugas kamu:
-- Apresiasi habit yang sudah selesai (singkat)
-- Ingatkan habit yang belum, terutama yang streaknya tinggi
-- Singgung task to-do yang mendesak jika ada
-- Kasih 1 motivasi atau saran konkret
-- Maksimal 5 kalimat, santai, seperti pesan dari teman. Jangan pakai bullet point.`;
+Tulis briefing harian untuk user. Gaya: seperti pesan dari mentor yang kenal baik — santai tapi tajam, kamu-aku, tidak basa-basi. Kalau ada yang sudah selesai, apresiasi secara spesifik dengan menyebut nama habit/task-nya. Kalau ada yang belum dikerjakan dan kamu punya data pola sebelumnya, jangan cuma ingatkan — tantang atau kasih reframe konkret. Boleh panjang kalau ada banyak hal penting, tapi jangan bertele-tele. Jangan pakai bullet point. Jangan mulai dengan sapaan klise seperti "Hei!", "Wah!", atau "Hai!".`;
+
+  const system = `Kamu adalah mentor produktivitas yang sudah kenal user ini dengan baik. Kamu berbicara jujur, kadang tegas, tapi selalu dengan niat yang baik. Kalau user skip sesuatu yang penting — kamu tidak sekedar mengingatkan, kamu menantang mereka untuk jujur dengan diri sendiri. Bahasa Indonesia kasual, boleh campur sedikit English kalau natural. Jangan terdengar seperti bot atau asisten generik.`;
 
   try {
-    const text = await callWorker({ prompt, system: 'Kamu adalah AI Coach produktivitas yang ramah dan memotivasi. Jawab dalam bahasa Indonesia yang santai.' });
+    const text = await callWorker({ prompt, system, max_tokens: 600 });
     textEl.textContent = text;
   } catch(err) {
     textEl.textContent = 'Gagal menghubungi AI Worker. Pastikan Worker sudah aktif dan GROQ_API_KEY sudah diset.';
@@ -2942,6 +3181,167 @@ Tugas kamu:
 
   // Tampilkan tombol refresh setelah selesai
   if (refreshBtn) refreshBtn.style.display = 'block';
+}
+
+// REKOMENDASI TO-DO
+let parsedRekomData = null;
+
+async function getAIRecommendations() {
+  const btn = document.getElementById('btnRekom');
+  const rekomResult = document.getElementById('rekomResult');
+  const rekomFields = document.getElementById('rekomFields');
+  const confirmBtn = document.getElementById('btnConfirmRekom');
+  const successEl = document.getElementById('rekomSuccess');
+
+  // Reset state
+  btn.disabled = true;
+  btn.textContent = 'Memproses...';
+  rekomResult.classList.remove('visible');
+  confirmBtn.classList.remove('visible');
+  successEl.classList.remove('visible');
+  parsedRekomData = null;
+
+  const today = getToday();
+  const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Ambil memory kalau ada
+  let memory = null;
+  try {
+    const raw = localStorage.getItem('dailyos_coach_memory');
+    if (raw) memory = JSON.parse(raw);
+  } catch {}
+
+  // Ambil konteks to-do selesai (30 terakhir)
+  const doneTodos = todos
+    .filter(t => t.done)
+    .slice(0, 30)
+    .map(t => `- [${t.priority.toUpperCase()}] ${t.title}`)
+    .join('\n');
+
+  // To-do aktif saat ini
+  const activeTodos = todos
+    .filter(t => !t.done)
+    .map(t => `- [${t.priority.toUpperCase()}] ${t.title}${t.deadline ? ' (deadline: '+formatDate(t.deadline)+')' : ''}`)
+    .join('\n');
+
+  // Habit hari ini
+  const scheduledHabits = habits.filter(h => isHabitScheduled(h, today));
+  const habitContext = scheduledHabits.map(h => `- ${h.name} (${h.category})`).join('\n');
+
+  const memorySection = memory ? `
+POLA KEBIASAAN USER (dari analisis 30 hari):
+${memory.patterns}
+Titik lemah: ${memory.weakSpots || '-'}
+Insight: ${memory.coachInsight}` : '';
+
+  const prompt = `Kamu adalah AI yang membantu user merekomendasikan task to-do yang relevan dan actionable.
+
+Tanggal hari ini: ${todayLabel}
+
+HABIT AKTIF HARI INI:
+${habitContext || '(tidak ada)'}
+
+TO-DO YANG SUDAH SELESAI (konteks pekerjaan terakhir):
+${doneTodos || '(belum ada)'}
+
+TO-DO YANG MASIH AKTIF:
+${activeTodos || '(tidak ada)'}
+${memorySection}
+
+Berdasarkan konteks di atas, rekomendasikan task-task to-do yang paling relevan untuk dikerjakan user. Pertimbangkan:
+- Apa yang baru saja diselesaikan dan apa follow-up logisnya?
+- Apa yang konsisten di-skip dari pola habit?
+- Task apa yang melengkapi pekerjaan yang sedang berjalan?
+
+Return HANYA JSON array tanpa penjelasan, tanpa backtick, tanpa markdown:
+[
+  {
+    "judul": "string max 60 karakter, spesifik dan actionable",
+    "deadline": "YYYY-MM-DD atau null",
+    "priority": "urgent | soon | normal",
+    "alasan": "1 kalimat singkat kenapa task ini direkomendasikan"
+  }
+]
+
+Rekomendasikan sebanyak yang benar-benar relevan — jangan paksa jika tidak ada yang cocok. Jangan rekomendasikan task yang sudah ada di to-do aktif.`;
+
+  try {
+    const raw = await callWorker({
+      prompt,
+      system: 'Kamu adalah AI task recommender. Return HANYA JSON array valid tanpa teks lain, tanpa backtick, tanpa markdown.',
+      max_tokens: 800
+    });
+
+    const clean = raw.replace(/```json|```/g, '').trim();
+    let parsed = JSON.parse(clean);
+    if (!Array.isArray(parsed)) parsed = [parsed];
+    parsedRekomData = parsed;
+
+    const priClass = { urgent:'pv-urgent', soon:'pv-soon', normal:'pv-normal' };
+    const priLabel = { urgent:'🔴 Urgent', soon:'🟡 Soon', normal:'🟢 Normal' };
+
+    let html = `<div style="font-size:11px;font-weight:600;color:var(--text-3);font-family:'DM Mono',monospace;margin-bottom:10px;letter-spacing:0.5px">${parsed.length} TASK DIREKOMENDASIKAN</div>`;
+
+    parsed.forEach((t, i) => {
+      const pc = priClass[t.priority] || '';
+      const pl = priLabel[t.priority] || t.priority;
+      const dl = t.deadline ? `<span style="font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;margin-left:6px">${t.deadline}</span>` : '';
+      html += `
+        <div class="rekom-item">
+          <div class="rekom-title">${t.judul}</div>
+          <div class="rekom-meta">
+            <span class="parsed-val ${pc}" style="font-size:12px">${pl}</span>
+            ${dl}
+          </div>
+          ${t.alasan ? `<div class="rekom-reason">↳ ${t.alasan}</div>` : ''}
+        </div>`;
+    });
+
+    rekomFields.innerHTML = html;
+    rekomResult.classList.add('visible');
+    confirmBtn.textContent = `+ Tambahkan ${parsed.length} Task ke To-Do`;
+    confirmBtn.classList.add('visible');
+
+  } catch(err) {
+    rekomFields.innerHTML = `<div style="font-size:13px;color:var(--text-2)">Gagal mendapatkan rekomendasi. Coba lagi atau pastikan Worker aktif.</div>`;
+    rekomResult.classList.add('visible');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Rekomendasi AI`;
+}
+
+function confirmAddRekom() {
+  if (!parsedRekomData || parsedRekomData.length === 0) return;
+
+  parsedRekomData.forEach((t, i) => {
+    let deadlineISO = t.deadline || '';
+    if (deadlineISO && !/^\d{4}-\d{2}-\d{2}$/.test(deadlineISO)) {
+      try {
+        const d = new Date(deadlineISO);
+        if (!isNaN(d)) deadlineISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        else deadlineISO = '';
+      } catch { deadlineISO = ''; }
+    }
+    todos.unshift({
+      id: `todo_rekom_${Date.now()}_${i}`,
+      title: t.judul,
+      priority: t.priority || 'normal',
+      deadline: deadlineISO,
+      done: false
+    });
+  });
+
+  save();
+  renderTodos();
+
+  const count = parsedRekomData.length;
+  document.getElementById('btnConfirmRekom').classList.remove('visible');
+  document.getElementById('rekomSuccess').textContent = `✓ ${count} task berhasil ditambahkan!`;
+  document.getElementById('rekomSuccess').classList.add('visible');
+  document.getElementById('rekomResult').classList.remove('visible');
+  parsedRekomData = null;
+  setTimeout(() => document.getElementById('rekomSuccess').classList.remove('visible'), 3000);
 }
 
 // SMART TODO

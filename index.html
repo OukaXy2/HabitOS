@@ -986,13 +986,14 @@
     body.dark .hp-done { background: #0d2e0f; color: #66bb6a; }
 
     .btn-ai-action {
-      width: 100%; padding: 12px;
+      width: 100%; padding: 11px 14px;
       background: var(--accent); color: var(--accent-fg);
-      border: none; border-radius: var(--radius);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
       font-family: 'DM Sans', sans-serif;
-      font-size: 14px; font-weight: 600;
+      font-size: 13px; font-weight: 600;
       cursor: pointer; transition: opacity 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
       margin-bottom: 12px;
     }
     .btn-ai-action:hover { opacity: 0.85; }
@@ -1117,16 +1118,16 @@
 
     /* Rekomendasi AI */
     .smart-btn-row { display: flex; gap: 8px; }
-    .smart-btn-row .btn-ai-action { flex: 1; margin-bottom: 0; }
+    .smart-btn-row .btn-ai-action { flex: 1; margin-bottom: 0; font-weight: 600; }
     .btn-ai-secondary {
       flex: 1;
       display: flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 10px 14px;
+      padding: 11px 14px;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: 'DM Sans', sans-serif;
-      font-size: 13px; font-weight: 500;
+      font-size: 13px; font-weight: 600;
       color: var(--text-2);
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
@@ -1743,7 +1744,21 @@ function switchView(v) {
   else fab.classList.add('hidden');
 
   if (v === 'stats') { updateStats(); updateTodoStats(); renderCalendar(); setTimeout(renderChart, 100); }
-  if (v === 'ai') { renderAIHabitPreview(); getAICoach(); }
+  if (v === 'ai') {
+    // Reset semua preview agar tidak tersisa dari sesi sebelumnya
+    document.getElementById('rekomResult').classList.remove('visible');
+    document.getElementById('btnConfirmRekom').classList.remove('visible');
+    document.getElementById('rekomSuccess').classList.remove('visible');
+    document.getElementById('parsedResult').classList.remove('visible');
+    document.getElementById('btnConfirmAdd').classList.remove('visible');
+    document.getElementById('addSuccess').classList.remove('visible');
+    parsedRekomData = null;
+    parsedTodoData = null;
+    // Re-sync dari localStorage supaya perubahan prioritas dll terbaca fresh
+    load();
+    renderAIHabitPreview();
+    getAICoach();
+  }
 }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
@@ -3284,7 +3299,7 @@ Rekomendasikan hanya yang benar-benar relevan. Kalau tidak ada yang cocok, retur
     parsedRekomData = parsed;
 
     const priClass = { urgent:'pv-urgent', soon:'pv-soon', normal:'pv-normal' };
-    const priLabel = { urgent:'🔴 Urgent', soon:'🟡 Soon', normal:'🟢 Normal' };
+    const priLabel = { urgent:'🔴 Hari Ini', soon:'🟡 Minggu Ini', normal:'🟢 Nanti' };
 
     let html = `<div style="font-size:11px;font-weight:600;color:var(--text-3);font-family:'DM Mono',monospace;margin-bottom:10px;letter-spacing:0.5px">${parsed.length} TASK DIREKOMENDASIKAN</div>`;
 
@@ -3420,7 +3435,7 @@ Pisahkan setiap task/keinginan yang berbeda menjadi objek terpisah.`;
 
     // Render preview semua task
     const priClass = { urgent:'pv-urgent', soon:'pv-soon', normal:'pv-normal' };
-    const priLabel = { urgent:'🔴 Urgent — Hari Ini', soon:'🟡 Soon — Minggu Ini', normal:'🟢 Normal — Nanti' };
+    const priLabel = { urgent:'🔴 Hari Ini', soon:'🟡 Minggu Ini', normal:'🟢 Nanti' };
 
     let html = `<div style="font-size:11px;font-weight:600;color:#2C5F2E;font-family:'DM Mono',monospace;margin-bottom:10px;letter-spacing:0.5px">${parsed.length} TASK DITEMUKAN</div>`;
 

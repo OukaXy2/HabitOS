@@ -3168,9 +3168,9 @@ TO-DO AKTIF:
 ${todoSummary}
 ${memorySection}
 
-Tulis briefing harian untuk user. Gaya: seperti pesan dari mentor yang kenal baik — santai tapi tajam, kamu-aku, tidak basa-basi. Kalau ada yang sudah selesai, apresiasi secara spesifik dengan menyebut nama habit/task-nya. Kalau ada yang belum dikerjakan dan kamu punya data pola sebelumnya, jangan cuma ingatkan — tantang atau kasih reframe konkret. Boleh panjang kalau ada banyak hal penting, tapi jangan bertele-tele. Jangan pakai bullet point. Jangan mulai dengan sapaan klise seperti "Hei!", "Wah!", atau "Hai!".`;
+Tulis briefing harian — maksimal 2-3 paragraf pendek, padat, dan langsung ke intinya. Gaya: pesan WhatsApp dari mentor yang kenal kamu baik, bukan pidato motivasi. Kalau ada yang sudah selesai, sebut spesifik dan lanjut. Kalau ada yang belum dan kamu punya data polanya, tantang langsung — jangan basa-basi atau filosofis. Pilih 1-2 hal paling penting untuk disorot, jangan bahas semuanya. Jangan pakai bullet point. Jangan mulai dengan sapaan klise seperti "Hei!", "Wah!", "Oke,", atau "Jadi,".`;
 
-  const system = `Kamu adalah mentor produktivitas yang sudah kenal user ini dengan baik. Kamu berbicara jujur, kadang tegas, tapi selalu dengan niat yang baik. Kalau user skip sesuatu yang penting — kamu tidak sekedar mengingatkan, kamu menantang mereka untuk jujur dengan diri sendiri. Bahasa Indonesia kasual, boleh campur sedikit English kalau natural. Jangan terdengar seperti bot atau asisten generik.`;
+  const system = `Kamu adalah mentor produktivitas yang sudah kenal user ini. Bicara seperti teman yang jujur — singkat, langsung, kadang nyelekit kalau perlu. Bahasa Indonesia kasual, boleh campur English kalau natural. Hindari kalimat motivasi klise seperti "aku percaya kamu bisa", "mari kita", "komitmen yang kuat". Jangan terdengar seperti bot.`;
 
   try {
     const text = await callWorker({ prompt, system, max_tokens: 600 });
@@ -3224,9 +3224,8 @@ async function getAIRecommendations() {
     .map(t => `- [${t.priority.toUpperCase()}] ${t.title}${t.deadline ? ' (deadline: '+formatDate(t.deadline)+')' : ''}`)
     .join('\n');
 
-  // Habit hari ini
-  const scheduledHabits = habits.filter(h => isHabitScheduled(h, today));
-  const habitContext = scheduledHabits.map(h => `- ${h.name} (${h.category})`).join('\n');
+  // Semua habit (bukan cuma hari ini) — untuk dihindari di rekomendasi
+  const allHabitNames = habits.map(h => `- ${h.name} (${h.category})`).join('\n');
 
   const memorySection = memory ? `
 POLA KEBIASAAN USER (dari analisis 30 hari):
@@ -3238,20 +3237,27 @@ Insight: ${memory.coachInsight}` : '';
 
 Tanggal hari ini: ${todayLabel}
 
-HABIT AKTIF HARI INI:
-${habitContext || '(tidak ada)'}
+HABIT YANG SUDAH ADA (JANGAN direkomendasikan sebagai to-do — ini sudah ditrack di habit tracker):
+${allHabitNames || '(tidak ada)'}
 
 TO-DO YANG SUDAH SELESAI (konteks pekerjaan terakhir):
 ${doneTodos || '(belum ada)'}
 
-TO-DO YANG MASIH AKTIF:
+TO-DO YANG MASIH AKTIF (JANGAN direkomendasikan lagi):
 ${activeTodos || '(tidak ada)'}
 ${memorySection}
 
-Berdasarkan konteks di atas, rekomendasikan task-task to-do yang paling relevan untuk dikerjakan user. Pertimbangkan:
-- Apa yang baru saja diselesaikan dan apa follow-up logisnya?
-- Apa yang konsisten di-skip dari pola habit?
-- Task apa yang melengkapi pekerjaan yang sedang berjalan?
+Tugas kamu: rekomendasikan task to-do yang BARU, SPESIFIK, dan ONE-OFF — bukan kegiatan rutin yang sudah ada di habit.
+
+Fokus pada:
+- Follow-up logis dari to-do yang baru selesai (misalnya: launch produk → minta review, evaluasi penjualan)
+- Task konkret yang mendukung goal jangka panjang dari to-do aktif
+- Hal yang terlewat dari konteks pekerjaan user
+
+JANGAN rekomendasikan:
+- Apapun yang namanya mirip atau sama dengan habit yang sudah ada
+- Task yang sudah ada di to-do aktif
+- Task generik yang tidak spesifik ke konteks user ini
 
 Return HANYA JSON array tanpa penjelasan, tanpa backtick, tanpa markdown:
 [
@@ -3259,11 +3265,11 @@ Return HANYA JSON array tanpa penjelasan, tanpa backtick, tanpa markdown:
     "judul": "string max 60 karakter, spesifik dan actionable",
     "deadline": "YYYY-MM-DD atau null",
     "priority": "urgent | soon | normal",
-    "alasan": "1 kalimat singkat kenapa task ini direkomendasikan"
+    "alasan": "1 kalimat singkat kenapa task ini relevan sekarang"
   }
 ]
 
-Rekomendasikan sebanyak yang benar-benar relevan — jangan paksa jika tidak ada yang cocok. Jangan rekomendasikan task yang sudah ada di to-do aktif.`;
+Rekomendasikan hanya yang benar-benar relevan. Kalau tidak ada yang cocok, return array kosong [].`;
 
   try {
     const raw = await callWorker({

@@ -1964,7 +1964,6 @@ function openHabitModal() {
   document.getElementById('habitModalTitle').textContent = 'Habit Baru';
   document.getElementById('habitName').value = '';
   document.getElementById('habitCategory').value = 'General';
-  document.getElementById('habitColor').value = '#1A1917';
   document.getElementById('habitColor').value = '#22C55E';
   document.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.dataset.color === '#22C55E'));
   setIconPickerValue('star');
@@ -2496,6 +2495,8 @@ function updateStats() {
       streak++;
     } else if (ds === today) {
       // hari ini belum dikerjakan, streak lanjut cek kemarin
+    } else if (scheduledToday.length === 0) {
+      // tidak ada habit yang dijadwalkan hari ini, skip (jangan putus streak)
     } else {
       break;
     }
@@ -2866,6 +2867,8 @@ document.addEventListener('DOMContentLoaded', () => {
           name: h.name || '',
           category: h.category || 'General',
           color: h.color || '#1A1917',
+          icon: h.icon || 'star',
+          activeDays: Array.isArray(h.activeDays) ? h.activeDays : [],
           subTasks: Array.isArray(h.subTasks) ? h.subTasks : [],
           history: h.history || {},
           collapsed: h.collapsed || false
@@ -2954,6 +2957,7 @@ function renderAIHabitPreview() {
       const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
       if (h.history?.[ds] && h.history[ds].length > 0) { streak++; sd.setDate(sd.getDate()-1); }
       else if (ds === today) { sd.setDate(sd.getDate()-1); }
+      else if (!isHabitScheduled(h, ds)) { sd.setDate(sd.getDate()-1); } // skip hari tidak terjadwal
       else break;
     }
     html += `<div class="habit-preview-row" style="${!scheduled?'opacity:0.4':''}">
@@ -3015,6 +3019,7 @@ function getHabitStats30Days() {
       const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
       if (h.history?.[ds] && h.history[ds].length > 0) { streak++; sd.setDate(sd.getDate()-1); }
       else if (ds === today) { sd.setDate(sd.getDate()-1); }
+      else if (!isHabitScheduled(h, ds)) { sd.setDate(sd.getDate()-1); } // skip hari tidak terjadwal
       else break;
     }
 
@@ -3025,7 +3030,7 @@ function getHabitStats30Days() {
     skipDays.forEach(ds => { skipByDay[new Date(ds+'T00:00:00').getDay()]++; });
     const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
     const weakDays = schedByDay
-      .map((total, i) => total > 0 ? { day: dayNames[i], rate: Math.round((skipByDay[i]/total)*100) } : null)
+      .map((total, i) => total >= 3 ? { day: dayNames[i], rate: Math.round((skipByDay[i]/total)*100) } : null)
       .filter(x => x && x.rate >= 50)
       .map(x => x.day);
 

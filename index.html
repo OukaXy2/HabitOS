@@ -2538,7 +2538,6 @@ function updateStats() {
   const today = getToday();
   let done = 0, total = 0;
   habits.forEach(h => {
-    if (h.archived) return; // skip archived
     if (!isHabitScheduled(h, today)) return; // skip jika bukan jadwalnya
     const tc = (h.subTasks && h.subTasks.length) ? h.subTasks.length : 1;
     total += tc;
@@ -2555,7 +2554,6 @@ function updateStats() {
     d.setDate(d.getDate() - i);
     const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     habits.forEach(h => {
-      if (h.archived) return;
       if (!isHabitScheduled(h, ds)) return;
       tw += (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
       tw2 += (h.history[ds] || []).length;
@@ -2568,7 +2566,7 @@ function updateStats() {
   let sd = new Date(today + 'T00:00:00');
   for (let i = 0; i < 3650; i++) {
     const ds = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
-    const scheduledToday = habits.filter(h => !h.archived && isHabitScheduled(h, ds));
+    const scheduledToday = habits.filter(h => isHabitScheduled(h, ds));
     const hasActivity = scheduledToday.length > 0 && scheduledToday.some(h => h.history[ds] && h.history[ds].length > 0);
     if (hasActivity) {
       streak++;
@@ -2600,7 +2598,6 @@ function renderChart() {
     labels.push(lbl);
     let dt = 0, dd = 0;
     habits.forEach(h => {
-      if (h.archived) return; // skip archived
       if (!isHabitScheduled(h, ds)) return; // skip jika bukan jadwalnya
       dt += (h.subTasks && h.subTasks.length > 0) ? h.subTasks.length : 1;
       dd += (h.history[ds] || []).length;

@@ -1731,7 +1731,7 @@ const SUPABASE_USER = 'jack';
 
 async function syncToSupabase() {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/daily_sync`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1747,8 +1747,10 @@ async function syncToSupabase() {
         synced_at: new Date().toISOString()
       })
     });
+    const text = await res.text();
+    alert('Sync status: ' + res.status + '\n' + text);
   } catch(e) {
-    console.warn('Sync gagal:', e);
+    alert('Sync gagal: ' + e.message);
   }
 }
 
